@@ -1,9 +1,4 @@
-// Bottom bracket: Shimano Innenlager BB-UN26 Vierkant
-BB_width = 110;
-BB_shell_width = 68;
-BB_shell_diameter = 34.8;
-
-module steering_BB () {
+module steering_BB (BB_width, BB_shell_width, BB_shell_diameter) {
     difference() {
         cylinder(h=BB_shell_width, r=BB_shell_diameter/2, center=true);
         cylinder(h=BB_shell_width - 10, r=BB_shell_diameter/2 - 5, center=true);
