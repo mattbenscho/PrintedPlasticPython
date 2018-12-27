@@ -71,7 +71,7 @@ translate([+wheelbase/2, 0, 0]) rotate([90, 0, 0]) {
 translate([0, 0, -rim_diameter/2-tire_width-100/2]) cube([wheelbase+rim_diameter+tire_width*2, 100, 100], center=true);
 
 ////// rider
-% translate([710, 0, -550]) rotate([0, 48, 180]) rider(left_hip_angle=55, left_knee_angle=10, right_hip_angle=90, right_knee_angle=90);
+% translate([710, 0, -550]) rotate([0, 48, 180]) rider(left_hip_angle=59, left_knee_angle=10, right_hip_angle=96, right_knee_angle=90);
 
 ////// maximum 3D printing volume
 * translate([0, 0, 400]) cube([200, 200, 200], center=true);
@@ -104,7 +104,7 @@ rotate(-rotate_xyz)
 translate(-translate_2_xyz)
 translate([cycling_bracket_distance, 0, cycling_bracket_height]) rotate([90, 0, 0]) {
     steering_BB(BB_width, BB_shell_width, BB_shell_diameter);
-    cranks(BB_shell_width+2);
+    cranks(bracket_width=BB_shell_width+2, crank_angle=210);
 }
 
 ////// rear frame: defining the points of the frame
@@ -288,10 +288,8 @@ p_cb_r_t = [+wheelbase/2, -front_frame_width_ext/2, 0] + v_rotate_y([- (rim_diam
 // p_cb_r_b = [+wheelbase/2 + rim_diameter/2 + tire_width/2, -front_frame_width/2 +10, +60]; # joint(p_cb_r_b);
 
 // two narrower points before connecting to cyling bottom bracket
-// p_cbn_l = [+wheelbase/2, +front_frame_width_ext/2-30, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 220); * joint(p_cbn_l);
-// p_cbn_r = [+wheelbase/2, -front_frame_width_ext/2+30, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 220); * joint(p_cbn_r);
-p_cbn_l = [ p_cb_l_t.x, +front_frame_width_ext/2-30, p_cb_l_t.z]; * joint(p_cbn_l);
-p_cbn_r = [ p_cb_r_t.x, -front_frame_width_ext/2+30, p_cb_r_t.z]; * joint(p_cbn_r);
+p_cbn_l = [ p_cb_l_t.x+80, +front_frame_width_ext/2-30, p_cb_l_t.z]; * joint(p_cbn_l);
+p_cbn_r = [ p_cb_r_t.x+80, -front_frame_width_ext/2+30, p_cb_r_t.z]; * joint(p_cbn_r);
 
 // connection to the cycling bottom bracket
 p_cbb_l_t = [cycling_bracket_distance, +20, cycling_bracket_height+40]; * joint(p_cbb_l_t);
@@ -307,6 +305,8 @@ p_lowz_1_l = [ wheelbase/2 + rim_diameter/2, p_front_hub_l.y, p_fw_l_b.z ]; * jo
 p_lowz_1_r = [ wheelbase/2 + rim_diameter/2, p_front_hub_r.y, p_fw_r_b.z ]; * joint(p_lowz_1_r);
 p_lowz_2_l = [+wheelbase/2, +front_frame_width_ext/2-30, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 170); * joint(p_lowz_2_l);
 p_lowz_2_r = [+wheelbase/2, -front_frame_width_ext/2+30, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 170); * joint(p_lowz_2_r);
+p_lowz_3_l = [+wheelbase/2, +front_frame_width_ext/2-30, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 190); * joint(p_lowz_3_l);
+p_lowz_3_r = [+wheelbase/2, -front_frame_width_ext/2+30, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 190); * joint(p_lowz_3_r);
 // p_lowz_2_l = [ wheelbase/2 + rim_diameter/2 + 100, +20, p_fw_l_b.z ]; * joint(p_lowz_2_l);
 // p_lowz_2_r = [ wheelbase/2 + rim_diameter/2 + 100, -20, p_fw_r_b.z ]; * joint(p_lowz_2_r);
 
@@ -382,9 +382,16 @@ beam(p_front_hub_r, p_lowz_1_r);
 beam(p_lowz_1_l, p_lowz_2_l);
 beam(p_lowz_1_r, p_lowz_2_r);
 
-beam(p_lowz_2_l, p_cbb_l_b);
-beam(p_lowz_2_r, p_cbb_r_b);
+beam(p_lowz_2_l, p_lowz_3_l);
+beam(p_lowz_2_r, p_lowz_3_r);
 beam(p_lowz_2_l, p_lowz_2_r);
+
+beam(p_lowz_3_l, p_cbb_l_b);
+beam(p_lowz_3_r, p_cbb_r_b);
+beam(p_lowz_3_l, p_lowz_3_r);
+
+beam(p_lowz_3_l, p_cbn_l);
+beam(p_lowz_3_r, p_cbn_r);
 
 // only works if using thru axles, otherwise mounting the wheel becomes hard when using dropouts
 beam(p_lowz_1_l, p_fw_l_b);

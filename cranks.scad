@@ -8,7 +8,7 @@
 
 function diameter(n) = (n/3.141) * 2.54 * 2;
 
-module cranks(bracket_width, crank_length=150, sprocket_width=3, qfactor = 150, chain_line=47.5, sprocket_distance = 5) {
+module cranks(bracket_width, crank_length=150, sprocket_width=3, qfactor = 150, chain_line=47.5, sprocket_distance = 5, crank_angle = 0) {
     translate([0, 0, chain_line]) {
         translate([0, 0, (-1)*sprocket_distance]) cylinder(r=diameter(24), h=sprocket_width, center=true);
         translate([0, 0, 0*sprocket_distance]) cylinder(r=diameter(34), h=sprocket_width, center=true);
@@ -16,26 +16,25 @@ module cranks(bracket_width, crank_length=150, sprocket_width=3, qfactor = 150, 
     }
     
     // crank next to sprockets
-    hull() {
+    rotate([0, 0, crank_angle]) hull() {
         translate([0, 0, chain_line + 2*sprocket_width + 5]) cylinder(r=10, h=10);
         translate([crank_length, 0, qfactor/2 + 5]) cylinder(r=10, h=10);
     }
     
-    translate([0, 0, qfactor/2 + 10]) difference() {
+    % translate([0, 0, qfactor/2 + 10]) difference() {
         cylinder(r=crank_length + 10, h=10, center=true, $fn=50);
         cylinder(r=crank_length + 8, h=12, center=true, $fn=50);
     }
 
     // crank on the other side
-    hull() {
+    rotate([0, 0, crank_angle]) hull() {
         translate([0, 0, -(chain_line + 2*sprocket_width + 15)]) cylinder(r=10, h=10);
         translate([-crank_length, 0, -(qfactor/2 + 15)]) cylinder(r=10, h=10);
     }
     
-    translate([0, 0, -qfactor/2 - 10]) difference() {
+    % translate([0, 0, -qfactor/2 - 10]) difference() {
         cylinder(r=crank_length + 10, h=10, center=true, $fn=50);
         cylinder(r=crank_length + 8, h=12, center=true, $fn=50);
     }
 }
 
-// cranks(70);
