@@ -1,3 +1,5 @@
+// Source: https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Tips_and_Tricks
+
 // Find the unitary vector with direction v. Fails if v=[0,0,0].
 function unit(v) = norm(v)>0 ? v/norm(v) : undef; 
 
@@ -26,5 +28,5 @@ module beam(p0, p1, diameter=beam_diameter, fn=default_beam_fn) {
 }
 
 module joint(p0, diameter=beam_diameter, fn=default_joint_fn) {
-    translate(p0) sphere(r=beam_diameter/2, $fn=default_joint_fn);
+    translate(p0) sphere(r=diameter/2, $fn=fn);
 }
