@@ -37,21 +37,33 @@ hub_axle_diameter = 12;
 rear_hub_width = 100;
 front_hub_width = 130;
 
+////// beam parameters
 beam_diameter = 32;
 default_beam_fn = 25;
+beam_wall_thickness = 2.1;
+default_beam_fn = 20;
+default_l = 20;
+default_l_in = 14;
+default_hole_diameter = 4;
+default_hole_distance = 5;
 joint_diameter = beam_diameter;
 joint_distance = 2*joint_diameter; // radial distance from the wheel
 default_joint_fn = 10;
 
+////// seat
 seat_translation = [850, 0, -350];
 seat_rotation = [0, 58, 180];
-// BB_adjustment = [-40, 0, 110];
 
+////// rear frame
 rear_frame_ground_clearance = 80;
 rear_frame_bottom_z = -(rim_diameter/2 - rear_frame_ground_clearance - beam_diameter/2);
 
+////// front frame
 front_frame_ground_clearance = 80;
 front_frame_bottom_z = -(rim_diameter/2 - front_frame_ground_clearance - beam_diameter/2);
+
+////// brakes
+brake_offset = 27; // see brake manual
 
 ////// floor
 translate([0, 0, -rim_diameter/2-tire_width-100/2]) cube([wheelbase+rim_diameter+tire_width*2, 100, 100], center=true);
@@ -87,12 +99,12 @@ translate([+wheelbase/2, 0, 0]) rotate([90, 0, 0]) {
 
 
 
-//////// steering bottom bracket
-BB_distance_to_wheel = 60;
+//////// pivot
+pivot_distance_to_wheel = 60;
 //
-translate_1_xyz = [- (rim_diameter/2 + tire_width/2 + BB_distance_to_wheel), 0, 0];
+translate_1_xyz = [- (rim_diameter/2 + tire_width/2 + pivot_distance_to_wheel), 0, 0];
 rotate_xyz = [0, pivot_angle-90, 0];
-translate_2_xyz = [ -translate_1_xyz.x + wheelbase/2 - (rim_diameter/2 + tire_width/2 + BB_distance_to_wheel), 0, 0];
+translate_2_xyz = [ -translate_1_xyz.x + wheelbase/2 - (rim_diameter/2 + tire_width/2 + pivot_distance_to_wheel), 0, 0];
 //
 //translate(translate_2_xyz)
 //rotate(rotate_xyz)
@@ -143,11 +155,11 @@ p_hj_l_b = p_hj_b + [0, 20, 0]; color("blue") joint(p_hj_l_b);
 p_hj_r_b = p_hj_b + [0, -20, 0]; color("blue") joint(p_hj_r_b);
 
 // the joints next to the rear wheel
-p_rear_wheel_r_t = [-wheelbase/2 + rim_diameter/2 + tire_width/2 + joint_distance, -rear_hub_width/2 - joint_diameter/2, 0] + [10, 0, 0]; * joint(p_rear_wheel_r_t);
-p_rear_wheel_l_t = [-wheelbase/2 + rim_diameter/2 + tire_width/2 + joint_distance, +rear_hub_width/2 + joint_diameter/2, 0] + [10, 0, 0]; * joint(p_rear_wheel_l_t);
+p_rear_wheel_l_t = [-wheelbase/2 + rim_diameter/2 + tire_width/2 + joint_distance, +rear_hub_width/2 + joint_diameter/2, 20]; * joint(p_rear_wheel_l_t);
+p_rear_wheel_r_t = [-wheelbase/2 + rim_diameter/2 + tire_width/2 + joint_distance, -rear_hub_width/2 - joint_diameter/2, 20]; * joint(p_rear_wheel_r_t);
 
-p_rear_wheel_r_b = [-p_hj_b.x, p_hj_b.y, rear_frame_bottom_z] + [0, -rear_frame_width/2, 0] + [10, 0, 0]; * joint(p_rear_wheel_r_b);
-p_rear_wheel_l_b = [-p_hj_b.x, p_hj_b.y, rear_frame_bottom_z] + [0, +rear_frame_width/2, 0] + [10, 0, 0]; * joint(p_rear_wheel_l_b);
+p_rear_wheel_r_b = [p_rear_wheel_r_t.x - 10, p_hj_b.y, rear_frame_bottom_z] + [0, -rear_frame_width/2, 0]; * joint(p_rear_wheel_r_b);
+p_rear_wheel_l_b = [p_rear_wheel_l_t.x - 10, p_hj_b.y, rear_frame_bottom_z] + [0, +rear_frame_width/2, 0]; * joint(p_rear_wheel_l_b);
 
 // joints directly under the rider, i.e. at x=0; 4 points for the top part
 // p_center_1_r_t = [-50, -rear_frame_width/2-50, 0]; joint(p_center_1_r_t);
@@ -157,8 +169,8 @@ p_center_1_r_t = [+50, -rear_frame_width/2-50, 30]; * joint(p_center_1_r_t);
 
 // p_center_2_r_t = [+50, -rear_frame_width/2-50, 10]; joint(p_center_2_r_t);
 // p_center_2_l_t = [+50, +rear_frame_width/2+50, 10]; joint(p_center_2_l_t);
-p_center_r_b = [0, -rear_frame_width/2-0, rear_frame_bottom_z]; * joint(p_center_r_b);
-p_center_l_b = [0, +rear_frame_width/2+0, rear_frame_bottom_z]; * joint(p_center_l_b);
+p_center_r_b = [30, -rear_frame_width/2-0, rear_frame_bottom_z]; * joint(p_center_r_b);
+p_center_l_b = [30, +rear_frame_width/2+0, rear_frame_bottom_z]; * joint(p_center_l_b);
 
 seat_points_l = [
     [p_center_1_l_t.x +120, rear_frame_width/2-20, p_center_1_l_t.z],
@@ -185,33 +197,36 @@ sp_list = concat([ for (i=[0, 1]) sp_calc[i]], [[p_center_1_l_t, p_center_1_r_t]
 
 // generating beams for the seat
 for(i=[0:len(sp_list)-1]) {
-    color("pink") {
+    * color("pink") {
         joint(sp_list[i][0]);
         joint(sp_list[i][1]);        
     }
-    color("green") {
-        beam(sp_list[i][0], sp_list[i+1][0]);
-        beam(sp_list[i][1], sp_list[i+1][1]);
-        if (i>1) {
-            beam(sp_list[i][0], sp_list[i][1]);
-            beam(sp_list[i][0], sp_list[i+1][1]);
-        };
-    }
+    // color("green") {
+		if (i<len(sp_list)-1) {
+			beam(sp_list[i][0], sp_list[i+1][0]);
+			beam(sp_list[i][1], sp_list[i+1][1]);
+			if (i>3) {
+				beam(sp_list[i][0], sp_list[i][1]);
+				beam(sp_list[i][0], sp_list[i+1][1]);
+			};
+		}
+    // }
 };
+
+// connecting the two joints next to the pivot
+beam(sp_list[2][0], sp_list[2][1]);
+// connecting the last two joints
+beam(sp_list[len(sp_list)-1][0], sp_list[len(sp_list)-1][1]);
 
 // extra joints for the butt
 p_butt_l = sp_list[1][0] + [0, -60, 0]; joint(p_butt_l);
 p_butt_r = sp_list[1][1] + [0, +60, 0]; joint(p_butt_r);
 
-beam(p_butt_l, sp_list[0][0]);
-beam(p_butt_r, sp_list[0][1]);
-beam(p_butt_l, sp_list[1][0]);
-beam(p_butt_r, sp_list[1][1]);
-beam(p_butt_l, p_hj_l_t);
-beam(p_butt_r, p_hj_r_t);
+// p_s_frame_l = [-wheelbase/2 + 170, rear_frame_width/2, 140]; joint(p_s_frame_l);
+// p_s_frame_r = [-wheelbase/2 + 170, -rear_frame_width/2, 140]; joint(p_s_frame_r);
 
-p_s_frame_l = [-wheelbase/2 + 170, rear_frame_width/2, 140]; joint(p_s_frame_l);
-p_s_frame_r = [-wheelbase/2 + 170, -rear_frame_width/2, 140]; joint(p_s_frame_r);
+p_rear_brake_l = [-wheelbase/2, 0, 0] + v_rotate_y([ rim_diameter/2 - brake_offset, +rear_frame_width/2, 0], -45); * joint(p_rear_brake_l);
+p_rear_brake_r = [-wheelbase/2, 0, 0] + v_rotate_y([ rim_diameter/2 - brake_offset, -rear_frame_width/2, 0], -45); * joint(p_rear_brake_r);
 
 ////// rear frame: connecting the joints with beams
 beam(p_rear_hub_r, p_rear_wheel_r_t);
@@ -227,7 +242,8 @@ beam(p_rear_wheel_r_b, p_rear_wheel_r_t);
 
 beam(p_rear_wheel_r_t, p_center_1_r_t);
 beam(p_rear_wheel_l_t, p_center_1_l_t);
-beam(p_rear_wheel_l_t, p_center_r_b);
+// beam(p_rear_wheel_l_t, p_center_r_b);
+beam(p_rear_wheel_l_b, p_center_r_b);
 
 beam(p_rear_wheel_r_b, p_center_r_b);
 beam(p_rear_wheel_l_b, p_center_l_b);
@@ -256,7 +272,35 @@ beam(p_hj_r_t, p_center_r_b);
 beam(p_center_1_l_t, p_hj_l_b);
 beam(p_center_1_r_t, p_hj_r_b);
 
-//
+////// seat
+
+// beams for the butt
+beam(p_butt_l, sp_list[0][0]);
+beam(p_butt_r, sp_list[0][1]);
+beam(p_butt_l, sp_list[1][0]);
+beam(p_butt_r, sp_list[1][1]);
+beam(p_butt_l, p_hj_l_t);
+beam(p_butt_r, p_hj_r_t);
+
+// seat connection to rear wheel top joints
+beam(p_rear_wheel_l_t, sp_list[3][0]);
+beam(p_rear_wheel_l_t, sp_list[4][0]);
+beam(p_rear_wheel_r_t, sp_list[3][1]);
+beam(p_rear_wheel_r_t, sp_list[4][1]);
+
+////// brake joint connections
+beam(p_rear_brake_l, sp_list[4][0]);
+beam(p_rear_brake_l, sp_list[5][0]);
+beam(p_rear_brake_l, sp_list[6][0]);
+beam(p_rear_brake_l, p_rear_hub_l);
+beam(p_rear_brake_l, p_rear_wheel_l_t);
+beam(p_rear_brake_r, sp_list[4][1]);
+beam(p_rear_brake_r, sp_list[5][1]);
+beam(p_rear_brake_r, sp_list[6][1]);
+beam(p_rear_brake_r, p_rear_hub_r);
+beam(p_rear_brake_r, p_rear_wheel_r_t);
+
+
 //// seat beams (horizontal beams)
 //beam(p_s_c_1_l, p_s_c_1_r);
 //beam(p_s_c_2_l, p_s_c_2_r);
