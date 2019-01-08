@@ -33,7 +33,8 @@ module beam(
     hole_angle_1=0,
     hole_angle_2=0,
     hole_distance_1=default_hole_distance,
-    hole_distance_2=default_hole_distance
+    hole_distance_2=default_hole_distance,
+	drill_hole=0
 ) {
     module drill_hole(this_l, this_l_in, this_hole_distance, this_hole_diameter, this_angle) {
         translate([0, 0, this_l + this_hole_distance + this_hole_diameter/2])
@@ -41,12 +42,17 @@ module beam(
                 cylinder(d=abs(this_hole_diameter), h=2*diameter, $fn=fn, center=true);
     }    
     v = p1-p0;
-    color("blue") translate(p0) sphere(r=diameter/2, $fn=fn);
-    color("blue") translate(p1) sphere(r=diameter/2, $fn=fn);
+	color("blue")
+		translate(p0)	
+			sphere(r=diameter/2, $fn=fn);
+    color("blue")
+		translate(p1)
+			sphere(r=diameter/2, $fn=fn);
     translate(p0)
         multmatrix(rotate_from_to([0,0,1],v)) {
             color("blue") {
             // cylinder(d=diameter, h=l1, $fn=fn);
+			if (drill_hole==1) {
             difference() {
                 translate([0, 0, l1]) cylinder(d=diameter - 2*beam_wall_thickness, h=l_in_1, $fn=fn);
                 drill_hole(l1, l_in_1, hole_distance_1, hole_diameter_1, hole_angle_1);
@@ -56,13 +62,20 @@ module beam(
                 translate([0, 0, norm(v)-l2-l_in_2]) cylinder(d=diameter - 2*beam_wall_thickness, h=l_in_2, $fn=fn);
                 drill_hole(norm(v)-l2, -l_in_2, -hole_distance_1, -hole_diameter_1, hole_angle_2);
             };          
+		} else {
+			translate([0, 0, l1]) cylinder(d=diameter - 2*beam_wall_thickness, h=l_in_1, $fn=fn);
+			translate([0, 0, norm(v)-l2-l_in_2]) cylinder(d=diameter - 2*beam_wall_thickness, h=l_in_2, $fn=fn);
+		}
             }
+			// echo("length of beam: ", norm(v)-l1-l2);
             difference() {
                 cylinder(d=diameter, h=norm(v), $fn=fn);
                 translate([0, 0, -1]) cylinder(d=2*diameter, h=l1+1, $fn=fn);
                 translate([0, 0, norm(v)-l2]) cylinder(d=2*diameter, h=l2+1, $fn=fn);
-                drill_hole(l1, l_in_1, hole_distance_1, hole_diameter_1, hole_angle_1);
-                drill_hole(norm(v)-l2, -l_in_2, -hole_distance_1, -hole_diameter_1, hole_angle_2);
+				if (drill_hole==1) {
+					drill_hole(l1, l_in_1, hole_distance_1, hole_diameter_1, hole_angle_1);
+					drill_hole(norm(v)-l2, -l_in_2, -hole_distance_1, -hole_diameter_1, hole_angle_2);
+				}
             }
         }
 	// extra rotation to avoid issues with CSG rendering

@@ -8,6 +8,7 @@ include <vector_operations.scad>;
 include <cranks.scad>;
 include <heim_joint.scad>;
 include <heim_joint_thru_axle.scad>;
+include <ortlieb_pannier.scad>;
 
 wheelbase = 930; // 20"
 // wheelbase = 1200; // 26"
@@ -53,6 +54,13 @@ default_joint_fn = 10;
 ////// seat
 seat_translation = [850, 0, -350];
 seat_rotation = [0, 58, 180];
+
+////// bagpack
+// * cube([300, 150, 500]);
+
+////// TODO: handle for bicycle bag on rear frame
+* translate([-500, +200, -50]) rotate([0, 0, 0]) ortlieb_pannier();
+* translate([-500, -200, -50]) rotate([0, 0, 180]) ortlieb_pannier();
 
 ////// rear frame
 rear_frame_ground_clearance = 80;
@@ -149,10 +157,10 @@ p_hj_t = translate_2_xyz + v_rotate_y(translate_1_xyz + [ -50, 0, +heim_spacing/
 
 p_hj_b = translate_2_xyz + v_rotate_y(translate_1_xyz + [ -50, 0, -heim_spacing/2 + heim_axis_offset], pivot_angle-90);
 
-p_hj_l_t = p_hj_t + [0, 20, 0]; color("red") joint(p_hj_l_t);
-p_hj_r_t = p_hj_t + [0, -20, 0]; color("red") joint(p_hj_r_t);
-p_hj_l_b = p_hj_b + [0, 20, 0]; color("blue") joint(p_hj_l_b);
-p_hj_r_b = p_hj_b + [0, -20, 0]; color("blue") joint(p_hj_r_b);
+p_hj_l_t = p_hj_t + [0, 20, 0]; * joint(p_hj_l_t);
+p_hj_r_t = p_hj_t + [0, -20, 0]; * joint(p_hj_r_t);
+p_hj_l_b = p_hj_b + [0, 20, 0]; * joint(p_hj_l_b);
+p_hj_r_b = p_hj_b + [0, -20, 0]; * joint(p_hj_r_b);
 
 // the joints next to the rear wheel
 p_rear_wheel_l_t = [-wheelbase/2 + rim_diameter/2 + tire_width/2 + joint_distance, +rear_hub_width/2 + joint_diameter/2, 20]; * joint(p_rear_wheel_l_t);
@@ -178,7 +186,6 @@ seat_points_l = [
     [p_center_1_l_t.x -90, rear_frame_width/2, p_center_1_l_t.z+80],
     [p_center_1_l_t.x -190, rear_frame_width/2, p_center_1_l_t.z+200],
     [p_center_1_l_t.x -300, rear_frame_width/2+20, p_center_1_l_t.z+300],
-    // [p_center_1_l_t.x -400, rear_frame_width/2, p_center_1_l_t.z+340],
     [p_center_1_l_t.x -390, rear_frame_width/2, p_center_1_l_t.z+400]
 ];
 
@@ -205,7 +212,7 @@ for(i=[0:len(sp_list)-1]) {
 		if (i<len(sp_list)-1) {
 			beam(sp_list[i][0], sp_list[i+1][0]);
 			beam(sp_list[i][1], sp_list[i+1][1]);
-			if (i>3) {
+			if (i>1) {
 				beam(sp_list[i][0], sp_list[i][1]);
 				beam(sp_list[i][0], sp_list[i+1][1]);
 			};
@@ -213,8 +220,6 @@ for(i=[0:len(sp_list)-1]) {
     // }
 };
 
-// connecting the two joints next to the pivot
-beam(sp_list[2][0], sp_list[2][1]);
 // connecting the last two joints
 beam(sp_list[len(sp_list)-1][0], sp_list[len(sp_list)-1][1]);
 
@@ -222,11 +227,22 @@ beam(sp_list[len(sp_list)-1][0], sp_list[len(sp_list)-1][1]);
 p_butt_l = sp_list[1][0] + [0, -60, 0]; joint(p_butt_l);
 p_butt_r = sp_list[1][1] + [0, +60, 0]; joint(p_butt_r);
 
-// p_s_frame_l = [-wheelbase/2 + 170, rear_frame_width/2, 140]; joint(p_s_frame_l);
-// p_s_frame_r = [-wheelbase/2 + 170, -rear_frame_width/2, 140]; joint(p_s_frame_r);
+p_rear_brake_l = [-wheelbase/2, 0, 0] + v_rotate_y([ rim_diameter/2 - brake_offset, +rear_frame_width/2, 0], -62); * joint(p_rear_brake_l);
+p_rear_brake_r = [-wheelbase/2, 0, 0] + v_rotate_y([ rim_diameter/2 - brake_offset, -rear_frame_width/2, 0], -62); * joint(p_rear_brake_r);
 
-p_rear_brake_l = [-wheelbase/2, 0, 0] + v_rotate_y([ rim_diameter/2 - brake_offset, +rear_frame_width/2, 0], -45); * joint(p_rear_brake_l);
-p_rear_brake_r = [-wheelbase/2, 0, 0] + v_rotate_y([ rim_diameter/2 - brake_offset, -rear_frame_width/2, 0], -45); * joint(p_rear_brake_r);
+////// support for the pannier 
+pannier_l = [-wheelbase/2 - 130, rear_frame_width/2, sp_list[5][0].z]; * joint(pannier_l);
+pannier_r = [-wheelbase/2 - 130, -rear_frame_width/2, sp_list[5][1].z]; * joint(pannier_r);
+p_pannier_l = [-wheelbase/2, 0, 0] + v_rotate_y([ -(rim_diameter/2 + tire_width/2 + joint_distance), +rear_frame_width/2, 0], 75); * joint(p_pannier_l);
+p_pannier_r = [-wheelbase/2, 0, 0] + v_rotate_y([ -(rim_diameter/2 + tire_width/2 + joint_distance), -rear_frame_width/2, 0], 75); * joint(p_pannier_r);
+
+beam(p_rear_hub_l, p_pannier_l);
+beam(p_rear_hub_r, p_pannier_r);
+beam(p_pannier_l, sp_list[6][0]);
+beam(p_pannier_r, sp_list[6][1]);
+beam(p_pannier_l, sp_list[5][0]);
+beam(p_pannier_r, sp_list[5][1]);
+beam(p_pannier_l, p_pannier_r);
 
 ////// rear frame: connecting the joints with beams
 beam(p_rear_hub_r, p_rear_wheel_r_t);
@@ -242,7 +258,7 @@ beam(p_rear_wheel_r_b, p_rear_wheel_r_t);
 
 beam(p_rear_wheel_r_t, p_center_1_r_t);
 beam(p_rear_wheel_l_t, p_center_1_l_t);
-// beam(p_rear_wheel_l_t, p_center_r_b);
+beam(p_rear_wheel_r_b, p_center_1_l_t);
 beam(p_rear_wheel_l_b, p_center_r_b);
 
 beam(p_rear_wheel_r_b, p_center_r_b);
@@ -253,15 +269,6 @@ beam(p_center_l_b, p_center_1_l_t);
 
 beam(p_center_l_b, p_hj_l_b);
 beam(p_center_r_b, p_hj_r_b);
-
-////// TODO: work out the details of the steering bottom bracket frame part
-
-//% beam(p_hj_r_b, p_hj_l_b);
-//% beam(p_hj_r_t, p_hj_l_t);
-//% beam(p_hj_l_b, p_hj_b);
-//% beam(p_hj_r_b, p_hj_b);
-//% beam(p_hj_l_t, p_hj_t);
-//% beam(p_hj_r_t, p_hj_t);
 
 beam(p_hj_l_b, p_hj_l_t);
 beam(p_hj_r_b, p_hj_r_t);
@@ -291,54 +298,16 @@ beam(p_rear_wheel_r_t, sp_list[4][1]);
 ////// brake joint connections
 beam(p_rear_brake_l, sp_list[4][0]);
 beam(p_rear_brake_l, sp_list[5][0]);
-beam(p_rear_brake_l, sp_list[6][0]);
+// beam(p_rear_brake_l, sp_list[6][0]);
 beam(p_rear_brake_l, p_rear_hub_l);
 beam(p_rear_brake_l, p_rear_wheel_l_t);
 beam(p_rear_brake_r, sp_list[4][1]);
 beam(p_rear_brake_r, sp_list[5][1]);
-beam(p_rear_brake_r, sp_list[6][1]);
+// beam(p_rear_brake_r, sp_list[6][1]);
 beam(p_rear_brake_r, p_rear_hub_r);
 beam(p_rear_brake_r, p_rear_wheel_r_t);
 
 
-//// seat beams (horizontal beams)
-//beam(p_s_c_1_l, p_s_c_1_r);
-//beam(p_s_c_2_l, p_s_c_2_r);
-//beam(p_s_t_1_l, p_s_t_1_r);
-//beam(p_s_t_2_l, p_s_t_2_r);
-//beam(p_s_t_3_l, p_s_t_3_r);
-//
-//// seat beams (left edge)
-//beam(p_center_1_l_t, p_s_c_1_l);
-//beam(p_s_c_1_l, p_s_c_2_l);
-//beam(p_s_c_2_l, p_s_t_1_l);
-//beam(p_s_t_1_l, p_s_t_2_l);
-//beam(p_s_t_1_l, p_s_t_3_l);
-//beam(p_s_t_2_l, p_s_t_3_l);
-//
-//// seat beams (right edge)
-//beam(p_center_1_r_t, p_s_c_1_r);
-//beam(p_s_c_1_r, p_s_c_2_r);
-//beam(p_s_c_2_r, p_s_t_1_r);
-//beam(p_s_t_1_r, p_s_t_2_r);
-//beam(p_s_t_1_r, p_s_t_3_r);
-//beam(p_s_t_2_r, p_s_t_3_r);
-//
-//// connecting the seat to the rear frame
-//beam(p_s_t_2_l, p_rear_hub_l);
-//beam(p_s_t_2_r, p_rear_hub_r);
-//
-//beam(p_s_t_1_l, p_s_frame_l);
-//beam(p_s_t_1_r, p_s_frame_r);
-//beam(p_s_c_2_l, p_s_frame_l);
-//beam(p_s_c_2_r, p_s_frame_r);
-//beam(p_rear_hub_l, p_s_frame_l);
-//beam(p_rear_hub_r, p_s_frame_r);
-//beam(p_rear_wheel_l_t, p_s_frame_l);
-//beam(p_rear_wheel_r_t, p_s_frame_r);
-//
-//beam(p_rear_wheel_l_t, p_s_c_1_l);
-//beam(p_rear_wheel_r_t, p_s_c_1_r);
 
 ////// front frame: defining the points of the frame
 front_frame_width = 90 + joint_diameter;
@@ -351,13 +320,9 @@ p_front_hub_l = [+wheelbase/2, +front_hub_width/2 + joint_diameter/2, 0]; * join
 // directly next to the heim joint
 p_hj_f_t = translate_2_xyz + v_rotate_y(translate_1_xyz + [ 0, 0, +heim_spacing/2 + heim_axis_offset - beam_diameter/2 - 10], pivot_angle-90);
 
+p_hj_f_c = translate_2_xyz + v_rotate_y(translate_1_xyz + [ 0, 0, -heim_spacing/2 + heim_axis_offset - beam_diameter/2 + 39], pivot_angle-90); joint(p_hj_f_c);
+
 p_hj_f_b = translate_2_xyz + v_rotate_y(translate_1_xyz + [ 0, 0, -heim_spacing/2 + heim_axis_offset - beam_diameter/2 - 10], pivot_angle-90);
-
-p_hj_f_l_t = p_hj_f_t + [0, 20, 0]; * joint(p_hj_f_l_t);
-p_hj_f_r_t = p_hj_f_t + [0, -20, 0]; * joint(p_hj_f_r_t);
-p_hj_f_l_b = p_hj_f_b + [0, 20, 0]; * joint(p_hj_f_l_b);
-p_hj_f_r_b = p_hj_f_b + [0, -20, 0]; * joint(p_hj_f_r_b);
-
 
 // points connecting to the ones at the bottom bracket
 // p_fw_l_t = [ p_hj_t.x+100, front_frame_width/2, p_hj_t.z+20]; * joint(p_fw_l_t);
@@ -375,12 +340,18 @@ p_fw_r_b = [ p_hj_b.x+100, p_front_hub_r.y, front_frame_bottom_z]; * joint(p_fw_
 p_rider_l_b = [+wheelbase/2, +front_frame_width_ext/2, 0] + v_rotate_y([ - (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 30); * joint(p_rider_l_b);
 p_rider_r_b = [+wheelbase/2, -front_frame_width_ext/2, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 30); * joint(p_rider_r_b);
 
-p_rider_l_t = [+wheelbase/2, +front_frame_width_ext/2, 0] + v_rotate_y([ - (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 60); * joint(p_rider_l_t);
-p_rider_r_t = [+wheelbase/2, -front_frame_width_ext/2, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 60); * joint(p_rider_r_t);
+p_rider_l_t = [+wheelbase/2, +front_frame_width_ext/2, 0] + v_rotate_y([ - (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 65); * joint(p_rider_l_t);
+p_rider_r_t = [+wheelbase/2, -front_frame_width_ext/2, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 65); * joint(p_rider_r_t);
+
+// joints for cantilever sockets
+p_front_brake_l = [+wheelbase/2, 0, 0]
+	+ v_rotate_y([ rim_diameter/2 - brake_offset, +front_frame_width/2, 0], 210); * joint(p_front_brake_l);
+p_front_brake_r = [+wheelbase/2, 0, 0]
+	+ v_rotate_y([ rim_diameter/2 - brake_offset, -front_frame_width/2, 0], 210); * joint(p_front_brake_r);
 
 // further to the cycling bottom bracket
-p_cb_l_t = [+wheelbase/2, +front_frame_width_ext/2, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 120); * joint(p_cb_l_t);
-p_cb_r_t = [+wheelbase/2, -front_frame_width_ext/2, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 120); * joint(p_cb_r_t);
+p_cb_l_t = [+wheelbase/2, +front_frame_width_ext/2, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 115); * joint(p_cb_l_t);
+p_cb_r_t = [+wheelbase/2, -front_frame_width_ext/2, 0] + v_rotate_y([- (rim_diameter/2 + tire_width/2 + joint_distance), 0, 0], 115); * joint(p_cb_r_t);
 // probably not enough space to fit
 // p_cb_l_b = [+wheelbase/2 + rim_diameter/2 + tire_width/2, +front_frame_width/2 -10, +60]; # joint(p_cb_l_b);
 // p_cb_r_b = [+wheelbase/2 + rim_diameter/2 + tire_width/2, -front_frame_width/2 +10, +60]; # joint(p_cb_r_b);
@@ -417,17 +388,27 @@ translate(-translate_1_xyz)
 rotate(-rotate_xyz)
 translate(-translate_2_xyz)
 {
-beam(p_hj_f_l_t, p_fw_l_t);
-beam(p_hj_f_r_t, p_fw_r_t);
-beam(p_hj_f_l_b, p_fw_l_b);
-beam(p_hj_f_r_b, p_fw_r_b);
-beam(p_hj_f_r_b, p_hj_f_l_b);
-beam(p_hj_f_r_t, p_hj_f_l_t);
+beam(p_hj_f_t, p_fw_l_t);
+beam(p_hj_f_t, p_fw_r_t);
+beam(p_hj_f_c, p_fw_l_t);
+beam(p_hj_f_c, p_fw_r_t);
+beam(p_hj_f_t, p_hj_f_c);
 
-// beam(p_fw_l_t, p_rider_l_b);
-// beam(p_fw_r_t, p_rider_r_b);
+beam(p_hj_f_b, p_fw_l_b);
+beam(p_hj_f_b, p_fw_r_b);
+
+beam(p_fw_l_t, p_fw_l_b);
+beam(p_fw_r_t, p_fw_r_b);	
+
+// hooking up the joint for the cantilever sockets
+beam(p_front_brake_l, p_rider_l_b);
+beam(p_front_brake_r, p_rider_r_b);
+beam(p_front_brake_l, p_front_hub_l);
+beam(p_front_brake_r, p_front_hub_r);
+beam(p_front_brake_l, p_fw_l_t);
+beam(p_front_brake_r, p_fw_r_t);
+
 beam(p_rider_l_b, p_rider_r_b);
-
 beam(p_rider_l_b, p_rider_l_t);
 beam(p_rider_r_b, p_rider_r_t);
 beam(p_rider_l_t, p_rider_r_t);
