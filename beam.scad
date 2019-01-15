@@ -68,7 +68,7 @@ module beam(
 		}
             }
 			// echo("length of beam: ", norm(v)-l1-l2);
-            difference() {
+            % difference() {
                 cylinder(d=diameter, h=norm(v), $fn=fn);
                 translate([0, 0, -1]) cylinder(d=2*diameter, h=l1+1, $fn=fn);
                 translate([0, 0, norm(v)-l2]) cylinder(d=2*diameter, h=l2+1, $fn=fn);
@@ -86,18 +86,28 @@ module beam(
 				translate([0, 0, norm(v)-l2]) cylinder(d=diameter, h=l2, $fn=fn);
 			}
 		}
-}
+};
+
+module printed_beam(
+    p0,
+    p1,
+    diameter=beam_diameter,
+    fn=default_beam_fn,
+) {
+	v = p1-p0;
+    translate(p0) {
+		color("blue")
+			sphere(r=diameter/2, $fn=fn);
+        multmatrix(rotate_from_to([0,0,1],v)) {
+            color("blue")
+                cylinder(d=diameter, h=norm(v), $fn=fn);
+		}
+	}
+	color("blue")
+		translate(p1)
+			sphere(r=diameter/2, $fn=fn);
+};
 
 module joint(p0, diameter=beam_diameter, fn=default_joint_fn) {
     translate(p0) sphere(r=diameter/2, $fn=fn);
-}
-
-//beam_diameter = 32;
-//default_beam_fn = 25;
-//beam_wall_thickness = 2.1;
-//default_beam_fn = 50;
-//default_l = 20;
-//default_l_in = 14;
-//default_hole_diameter = 4;
-//default_hole_distance = 5;
-//beam([0, 0, 0], [100, 100, 100], hole_angle_1=0);
+};
