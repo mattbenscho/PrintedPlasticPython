@@ -399,35 +399,35 @@ printed_beam(p_hj_f_t, p_hj_f_c);
 printed_beam(p_fw_l_t, p_fw_r_t);
 
 // two bottom beams
-beam(p_hj_f_b, p_fw_l_b);
+beam(p_hj_f_b, p_fw_l_b, l2=25);
 beam(p_hj_f_b, p_fw_r_b, l2=25);
 
 beam(p_fw_l_t, p_fw_l_b, l1=55, l2=25);
 beam(p_fw_r_t, p_fw_r_b, l1=55, l2=25);	
 
 // hooking up the joint for the cantilever sockets
-beam(p_front_brake_l, p_rider_l_b);
-beam(p_front_brake_r, p_rider_r_b);
-beam(p_front_brake_l, p_front_hub_l);
-beam(p_front_brake_r, p_front_hub_r);
+beam(p_front_brake_l, p_rider_l_b, l1=30, l2=30);
+beam(p_front_brake_r, p_rider_r_b, l1=30, l2=30);
+beam(p_front_brake_l, p_front_hub_l, l2=60);
+beam(p_front_brake_r, p_front_hub_r, l2=60);
 beam(p_front_brake_l, p_fw_l_t, l1=30, l2=30);
 beam(p_front_brake_r, p_fw_r_t, l1=30, l2=30);
 
-beam(p_rider_l_b, p_rider_r_b);
-beam(p_rider_l_b, p_rider_l_t);
-beam(p_rider_r_b, p_rider_r_t);
-beam(p_rider_l_t, p_rider_r_t);
+printed_beam(p_rider_l_b, p_rider_r_b);
+beam(p_rider_l_b, p_rider_l_t, l1=30, l2=30);
+beam(p_rider_r_b, p_rider_r_t, l1=30, l2=30);
+printed_beam(p_rider_l_t, p_rider_r_t);
 
-beam(p_rider_l_t, p_cb_l_t);
-beam(p_rider_r_t, p_cb_r_t);
-beam(p_cb_l_t, p_cb_r_t);
+beam(p_rider_l_t, p_cb_l_t, l1=30, l2=30);
+beam(p_rider_r_t, p_cb_r_t, l1=30, l2=30);
+printed_beam(p_cb_l_t, p_cb_r_t);
 
-beam(p_cb_l_t, p_cbn_l);
-beam(p_cb_r_t, p_cbn_r);
+printed_beam(p_cb_l_t, p_cbn_l);
+printed_beam(p_cb_r_t, p_cbn_r);
 
-beam(p_cbn_l, p_cbb_l_t);
-beam(p_cbn_r, p_cbb_r_t);
-beam(p_cbn_l, p_cbn_r);
+beam(p_cbn_l, p_cbb_l_t, l1=30);
+beam(p_cbn_r, p_cbb_r_t, l1=30);
+printed_beam(p_cbn_l, p_cbn_r);
 
 // beam(p_fw_l_b, p_cb_l_b);
 // beam(p_fw_r_b, p_cb_r_b);
@@ -437,17 +437,17 @@ beam(p_cbn_l, p_cbn_r);
 // beam(p_cb_r_b, p_cbb_r_c);
 
 // connecting everything to the front wheel hub
-beam(p_front_hub_l, p_fw_l_b);
-beam(p_front_hub_r, p_fw_r_b);
+// beam(p_front_hub_l - [0, 0, 30], p_fw_l_b);
+// beam(p_front_hub_r - [0, 0, 30], p_fw_r_b);
 
-beam(p_front_hub_l, p_fw_l_t_80, l2=30);
-beam(p_front_hub_r, p_fw_r_t_80, l2=30);
+beam(p_front_hub_l, p_fw_l_t_80, l1=60, l2=30);
+beam(p_front_hub_r, p_fw_r_t_80, l1=60, l2=30);
 
-beam(p_front_hub_l, p_rider_l_t);
-beam(p_front_hub_r, p_rider_r_t);
+beam(p_front_hub_l, p_rider_l_t, l1=60, l2=30);
+beam(p_front_hub_r, p_rider_r_t, l1=60, l2=30);
 
-beam(p_front_hub_l, p_cb_l_t);
-beam(p_front_hub_r, p_cb_r_t);
+beam(p_front_hub_l, p_cb_l_t, l1=40, l2=30);
+beam(p_front_hub_r, p_cb_r_t, l1=40, l2=30);
 
 // probably not enough space to fit
 // beam(p_front_hub_l, p_cb_l_b);
@@ -460,24 +460,36 @@ beam(p_front_hub_r, p_cb_r_t);
 // beam(p_front_hub_r, p_cbb_r_c);
 
 // low-z front part
-beam(p_front_hub_l, p_lowz_1_l);
-beam(p_front_hub_r, p_lowz_1_r);
+beam(p_front_hub_l, p_lowz_1_l, l2=70);
+beam(p_front_hub_r, p_lowz_1_r, l2=70);
+
+half_point_l = p_lowz_1_l - 0.57 * (p_lowz_1_l - p_fw_l_b);
+half_point_r = p_lowz_1_r - 0.57 * (p_lowz_1_r - p_fw_r_b);
+
+beam(p_front_hub_l, half_point_l, l1=35, l2=35);
+beam(p_front_hub_r, half_point_r, l1=35, l2=35);
 
 beam(p_lowz_1_l, p_lowz_2_l);
 beam(p_lowz_1_r, p_lowz_2_r);
 
 beam(p_lowz_2_l, p_lowz_3_l);
 beam(p_lowz_2_r, p_lowz_3_r);
-beam(p_lowz_2_l, p_lowz_2_r);
+printed_beam(p_lowz_2_l, p_lowz_2_r);
 
-beam(p_lowz_3_l, p_cbb_l_b);
-beam(p_lowz_3_r, p_cbb_r_b);
-beam(p_lowz_3_l, p_lowz_3_r);
+beam(p_lowz_3_l, p_cbb_l_b, l1=35);
+beam(p_lowz_3_r, p_cbb_r_b, l1=35);
+printed_beam(p_lowz_3_l, p_lowz_3_r);
 
-beam(p_lowz_3_l, p_cbn_l);
-beam(p_lowz_3_r, p_cbn_r);
+beam(p_lowz_3_l, p_cbn_l, l1=35, l2=35);
+beam(p_lowz_3_r, p_cbn_r, l1=35, l2=35);
 
 // only works if using thru axles, otherwise mounting the wheel becomes hard when using dropouts
-beam(p_lowz_1_l, p_fw_l_b);
-beam(p_lowz_1_r, p_fw_r_b);
+// beam(p_lowz_1_l, p_fw_l_b, l1=70);
+// beam(p_lowz_1_r, p_fw_r_b, l1=70);
+
+beam(p_lowz_1_l, half_point_l, l1=70, l2=40);
+beam(p_lowz_1_r, half_point_r, l1=70, l2=40);
+
+beam(half_point_l, p_fw_l_b);
+beam(half_point_r, p_fw_r_b);
 }
