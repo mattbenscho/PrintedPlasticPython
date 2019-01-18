@@ -68,7 +68,7 @@ module beam(
 		}
             }
 			// echo("length of beam: ", norm(v)-l1-l2);
-            difference() {
+            % difference() {
                 cylinder(d=diameter, h=norm(v), $fn=fn);
                 translate([0, 0, -1]) cylinder(d=2*diameter, h=l1+1, $fn=fn);
                 translate([0, 0, norm(v)-l2]) cylinder(d=2*diameter, h=l2+1, $fn=fn);
